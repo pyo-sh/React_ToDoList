@@ -12,11 +12,6 @@ import createSagaMiddleware from 'redux-saga';
 import rootSaga from '../sagas';
 
 
-ToDoList.propTypes = {
-    Component : PropTypes.elementType.isRequired,
-    store: PropTypes.object.isRequired,
-}
-
 const ToDoList = ({ Component, store }) => {
     return(
         <Provider store={store}>
@@ -31,6 +26,11 @@ const ToDoList = ({ Component, store }) => {
         </Provider>
     );
 }
+ToDoList.propTypes = {
+    Component : PropTypes.elementType.isRequired,
+    store: PropTypes.object.isRequired,
+}
+
 // redux settings
 const configureStore = (initialState, options) => {
     // redux-saga 추가
