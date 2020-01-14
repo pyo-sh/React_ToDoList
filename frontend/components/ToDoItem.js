@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { UpdateListRequestAction, DeleteListRequestAction } from '../reducers/list';
 import PropTypes from 'prop-types';
 
-import { Button, Input, Icon, Form } from 'antd';
+import { Input, Icon } from 'antd';
 import styled from 'styled-components';
 
 const ToDo = styled.div`
@@ -19,22 +19,17 @@ const ToDo = styled.div`
     border-radius: 10px;
 `;
 
-const UpdateToDoForm = styled(Form)`
+const UpdateToDoDiv = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    width: 410px;
+    width: 400px;
 `;
 const UpdateToDoInput = styled(Input)`
-    width: 310px;
+    width: 360px;
     height: 40px;
     font-size: 20px;
-`;
-const UpdateToDoButton = styled(Button)`
-    width: 100px;
-    height: 40px;
-    padding: 0;
 `;
 
 const TextDiv = styled.div`
@@ -46,14 +41,15 @@ const TextDiv = styled.div`
 
 const ToDoItem = ({ list, listClicked, setListClicked }) => {
     const dispatch = useDispatch();
-    const isUpdated = useSelector(state => state.list.listUpdated);     // Update 됐으면
-    const isUpdating = useSelector(state => state.list.isListUpdating); // redux에서 업데이트를 하고 있는지
-    const isDeleting = useSelector(state => state.list.isListDeleting); // redux에서 삭제를 실행하고 있는지
+    const isUpdated = useSelector(state => state.list.listUpdated);         // Update 됐으면
+    const isUpdating = useSelector(state => state.list.isListUpdating);     // redux에서 업데이트를 하고 있는지
+    const isDeleting = useSelector(state => state.list.isListDeleting);     // redux에서 삭제를 실행하고 있는지
     const deleteError = useSelector(state => state.list.deleteListErrorReason);
-    const [isChanging, setIsChanging] = useState(false);                // div상태,input상태 를 결정
-    const [inputText, setInputText] = useState(list.text);              // 현재 toDo에 대한 text값
-    const [iconState, setIconState] = useState("close-circle");         // 아이콘의 상태를 나타내는 state
-    const [clickedDelete, setClickedDelete] = useState(false);          // 삭제 아이콘을 클릭했는지
+    const [isChanging, setIsChanging] = useState(false);                    // div상태,input상태 를 결정
+    const [inputText, setInputText] = useState(list.text);                  // 현재 toDo에 대한 text값
+    const [updateIconState, setUpdateIconState] = useState("check-circle");
+    const [deleteIconState, setDeleteIconState] = useState("close-circle"); // 아이콘의 상태를 나타내는 state
+    const [clickedDelete, setClickedDelete] = useState(false);              // 삭제 아이콘을 클릭했는지
 
     // div 상태인 ToDo를 클릭했을 때. -> input으로 바꾼다.
     const onClickDiv = useCallback((e) => {
@@ -74,31 +70,38 @@ const ToDoItem = ({ list, listClicked, setListClicked }) => {
     // Update 요청에 대한 처리
     const updateText = useCallback((e) => {
         e.preventDefault();
-        if(inputText === "") alert("할 일을 입력해주세요");
+        if(inputText === "")    alert("할 일을 입력해주세요");
+        else if(isDeleting)     alert("다른 처리를 기다려주세요");
         else{
             dispatch(UpdateListRequestAction(({
                 ...list,
                 text: inputText,
             })));
         }
-    }, [inputText]);
+    }, [inputText, isDeleting]);
     // Update 후에 Div로 바꾸는 처리
     useEffect(() => {
         if((listClicked === list.id) && isUpdated){
             setListClicked(-1);
         }
     }, [isUpdated]);
+    // 삭제 처리에 대한 icon 처리
+    useEffect(() => {
+        if(isUpdating)      setUpdateIconState("loading");
+        else                setUpdateIconState("check-circle");
+    } ,[isUpdating]);
+
 
     // input 삭제처리
     const onClickDelete = useCallback((e) => {
         // 다른 list를 삭제하고 있다면
-        if(isDeleting)  alert('삭제를 기다리세요!');
+        if(isDeleting || isUpdating)  alert('다른 처리를 기다리세요!');
         // 삭제를 할 수 있다면.
         else{
             setClickedDelete(true);
             dispatch(DeleteListRequestAction(list.id));
         }
-    }, [isDeleting]);
+    }, [isDeleting, isUpdating]);
     // 삭제가 실패 됐을 때
     useEffect(() => {
         // Error 메세지가 뜨면?
@@ -109,36 +112,35 @@ const ToDoItem = ({ list, listClicked, setListClicked }) => {
     }, [deleteError]);
     // 삭제 처리에 대한 icon 처리
     useEffect(() => {
-        if(clickedDelete)   setIconState("loading");
-        else                setIconState("close-circle");
+        if(clickedDelete)   setDeleteIconState("loading");
+        else                setDeleteIconState("close-circle");
     } ,[clickedDelete]);
 
     return (
         <ToDo>
             <div onClick={onClickDiv}>
                 {isChanging
-                ?   <UpdateToDoForm onSubmit={updateText}>
+                ?   <UpdateToDoDiv>
                         <UpdateToDoInput
                             placeholder="무슨 일을 하실건가요?"
                             defaultValue={list.text}
                             onChange={onChangeText}
+                            onPressEnter={updateText}
                         />
-                        <UpdateToDoButton
-                            type="primary"
-                            htmlType="submit"
-                            loading={isUpdating}
-                            ghost
-                        >Update</UpdateToDoButton>
-                    </UpdateToDoForm>
+                        <Icon
+                            type={updateIconState}
+                            onClick={updateText}
+                            style={{color:'#52c41a', fontSize: '30px'}}
+                        />
+                    </UpdateToDoDiv>
                 :   <TextDiv>{list.text}</TextDiv>
                 }
             </div>
             <Icon
-                type={iconState}
+                type={deleteIconState}
                 onClick={onClickDelete}
                 style={{color: '#52c41a', fontSize: '30px'}} 
-            >
-            </Icon>
+            />
         </ToDo>
     );
 };
