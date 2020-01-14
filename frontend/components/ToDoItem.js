@@ -33,7 +33,7 @@ const UpdateToDoInput = styled(Input)`
 `;
 
 const TextDiv = styled.div`
-    width: 410px;
+    width: 408px;
     padding-top: 2px;
     padding-left: 12px;
     font-size: 20px;
