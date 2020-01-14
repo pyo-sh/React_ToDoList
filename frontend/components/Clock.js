@@ -22,9 +22,13 @@ const Clock = () => {
     // 현재 시간에 대한 값을 time state에 setState
     const getTime = () => {
         const time = new Date();
-        const hour = time.getHours();
-        const minute = time.getMinutes();
-        const second = time.getSeconds();
+        let hour, minute, second;
+        if(time.getHours() < 10)    hour = '0' + time.getHours().toString();
+        else                        hour = time.getHours();
+        if(time.getMinutes() < 10)  minute = '0' + time.getMinutes().toString();
+        else                        minute = time.getMinutes();
+        if(time.getSeconds() < 10)  second = '0' + time.getSeconds().toString();
+        else                        second = time.getSeconds();
         setTime({
             hour: hour,
             minute: minute,
@@ -34,7 +38,7 @@ const Clock = () => {
     // ComponentDidMount
     useEffect(() => {
         // 10ms 마다 getTime 함수 실행
-        setInterval(getTime, 10);
+        setInterval(getTime, 100);
     }, []);
     return(
         <ClockBox>
