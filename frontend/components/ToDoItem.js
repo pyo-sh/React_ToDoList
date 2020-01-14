@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { UpdateListRequestAction, DeleteListRequestAction } from '../reducers/list';
+import PropTypes from 'prop-types';
 
 import { Button, Input, Icon, Form } from 'antd';
 import styled from 'styled-components';
@@ -84,7 +85,7 @@ const ToDoItem = ({ list, listClicked, setListClicked }) => {
     // Update 후에 Div로 바꾸는 처리
     useEffect(() => {
         if((listClicked === list.id) && isUpdated){
-            setListClicked('');
+            setListClicked(-1);
         }
     }, [isUpdated]);
 
@@ -140,6 +141,12 @@ const ToDoItem = ({ list, listClicked, setListClicked }) => {
             </Icon>
         </ToDo>
     );
+};
+
+ToDoItem.propTypes = {
+    list: PropTypes.object.isRequired,
+    listClicked: PropTypes.number.isRequired,
+    setListClicked: PropTypes.func.isRequired,
 };
 
 export default ToDoItem;
